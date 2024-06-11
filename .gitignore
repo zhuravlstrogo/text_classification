@@ -180,6 +180,6 @@ reviews/
 *.zip
 *.tar
 
-models/
+config.py
 
 README.md

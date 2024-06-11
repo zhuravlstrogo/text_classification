@@ -12,6 +12,8 @@ pd.set_option('display.max_columns', None)
 pd.set_option('max_colwidth', None)
 pd.options.display.expand_frame_repr = False
 
+from config import token
+
 # кол-во дней, за к-ые перегружаем данные 
 N = 1825
 # 1825 - 5 лет
@@ -39,7 +41,7 @@ N = 1825
 def get_reviews(from_date, to_date, true_date):
     headers = {
         'Accept': 'application/json'
-        ,'Authorization': 'Bearer 9e3c614a-0bc6-4cb9-b041-1fce1c067a60'
+        ,'Authorization': f'Bearer {token}'
         ,'Accept-Charset': 'UTF-8'
             }
 
