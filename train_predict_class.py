@@ -1,75 +1,33 @@
 import pandas as pd
 import numpy as np
+
 import fasttext
-from sklearn.metrics import precision_recall_fscore_support, classification_report
+from sklearn.metrics import classification_report
 from sklearn.model_selection import StratifiedShuffleSplit
-import re
-from gensim.parsing.preprocessing import STOPWORDS
-from gensim.parsing.preprocessing import remove_stopwords
-from gensim.utils import simple_preprocess
 import warnings
 warnings.filterwarnings("ignore")
 
 pd.options.display.max_colwidth = 1000
 
-from utils import extract_tag, create_tags, rename_tags, join_words
+from utils import extract_tag, create_tags, rename_tags, join_words, process_classes
 
-# TODO: очереди регуляркой помечать?
-# TODO: предобработку в функцию 
-# TODO: в модель определения темы добавить предсказание тональности 
-# TODO: удалять стоп слова 
-
-# TODO: remove '\n'
+# TODO: очереди, сотрудники, скорость, комфорт регуляркой помечать?
 # TODO: посмотреть топ слов по встречаемости, добавить их в словарь стоп слов
 # TODO: исправлять опечатки 
+
 # TODO: добавлять веса к отдельным значимым словам, чтобы их влияние в тексте было больше 
 # TODO: razdel
 # TODO: убрать ошибки
 # tag_by_review = df.groupby(['Номер филиала', 'Текст отзыва', 'Дата написания отзыва', 'Автор отзыва'], as_index=False).agg(
 #     tag_count=('Теги', 'count'))
 # tag_by_review[tag_by_review['tag_count'] == 2]
-# TODO: рассмотреть тип без тематики, благодарность
 # TODO: несколько меток - - навязывание продуктов, страховка 
 # TODO: мошенничество + навязывание продуктов
-# TODO: в качестве обслуживания разделять негатив, нейтрал и позитив 
+
+# TODO: в модель определения темы добавить предсказание тональности 
 
 
 
-
-def process(df_headline):
-    # Проверяем количество переменных и наблюдений
-    df_headline = df_headline.drop_duplicates()
-    df_headline = df_headline.dropna(subset=['Текст отзыва', 'Теги'])
-    print(df_headline.shape)
-
-
-    # Отобразим примеры заголовков
-    # print('SOURCE')
-    # print(df_headline[['Текст отзыва', 'Теги']].head(3))
-
-    df_headline['Теги'] = df_headline['Теги'].apply(rename_tags) 
-    df_headline['Теги'] = df_headline['Теги'].str.replace("благодарность - " ,"") 
-    df_headline['Теги'] = df_headline['Теги'].str.replace(" " ,"_") 
-
-    df_headline['Текст отзыва'] = df_headline['Текст отзыва'].apply(simple_preprocess) 
-    df_headline['Текст отзыва'] = df_headline['Текст отзыва'].apply(join_words) 
-    # print('PROCESSED')
-    # print(df_headline[['Текст отзыва', 'Теги']].head(3))
-
-    vc = df_headline['Теги'].value_counts()
-    selected_classes = vc[vc > 100].keys()
-
-    # print('selected_classes ', selected_classes)
-
-    # print(f"ALL CLASSES LEN {len(selected_classes)}")
-    # print(selected_classes)
-    # df_headline = df_headline[df_headline['Теги'].isin(selected_classes)]
-
-    df_headline['Теги']  = np.where(df_headline['Теги'].isin(selected_classes), df_headline['Теги'], 'без_тематики')
-
-    # skip = ['качество_обслуживания', 'благодарность_общая', 'без_тематики']
-    # df_headline = df_headline[~df_headline['Теги'].isin(skip)]
-    return df_headline
 
 
 # with open('stop-words-ru.txt') as f:
@@ -96,7 +54,7 @@ df_2024['Теги'] = df_2024['Теги'].apply(extract_tag)
 df_headline = pd.read_csv('Tanya_file.csv',encoding='utf-8-sig')
 
 df_headline = pd.concat([df_headline, df_2024], axis=0)
-df_headline = process(df_headline)
+df_headline = process_classes(df_headline)
 
 # отложить честный test
 #  стратификация 
@@ -128,7 +86,7 @@ print(f'CHECK: {N == len(X_train)}')
 
 
 generated_data = pd.read_csv('generated_data.csv')
-generated_data = process(generated_data)
+generated_data = process_classes(generated_data)
 
 df_headline = pd.concat([df_headline, generated_data], axis=0)
 print(f'{len(df_headline) - N} generated data added')
@@ -140,12 +98,11 @@ print(df_headline['Теги'].value_counts())
 X_train = df_headline['Текст отзыва']
 y_train = df_headline['Теги']
 
-print('X_train')
-print(X_train.head())
+# print('X_train')
+# print(X_train.head())
 
-print('y_train')
-print(y_train.head())
-
+# print('y_train')
+# print(y_train.head())
 
 
 # Создадим текстовые файля для обучения модели с лейблом и текстом
@@ -156,11 +113,11 @@ with open('train.txt', 'w') as f:
 
 # модель
 model1 = fasttext.train_supervised('train.txt', epoch=500, lr=1.0, wordNgrams =2)
-model1.save_model("models/model_13_june_1.bin")
-print('model saved')
+model_name = "model_13_june_2.bin"
+model1.save_model("models/" + model_name)
+print(f' {model_name} saved')
 
 s = "при оформлении кредита пытались впарить дополнительную страховку то есть еще одну страховки итого договор не подписал на следующий день деньги за нее все равно списали по горячей линии подтвердили что услуга не обязательна но разбираются ситуации уже месяц даже если вы не подписали договор сотрудники ради премии все равно без вашего ведома впарят вам то что им нужно"
-
 labels = model1.predict(s, k = 1)
 
 # # Создадим функцую для отображения результатов обучения модели

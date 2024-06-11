@@ -1,4 +1,7 @@
+import pandas as pd
+import numpy as np
 
+from gensim.utils import simple_preprocess
 
 
 def extract_tag(tag):
@@ -22,6 +25,7 @@ def create_tags(review):
     else:
             return None
 
+
 def rename_tags(tag):
     if type(tag) == str:
         if 'навязыван' in tag:
@@ -36,8 +40,8 @@ def rename_tags(tag):
             return 'очередь'
         elif 'ВТБ' in tag:
             return 'мобайл/онлайн'
-        # elif 'сотрудн' in tag:
-        #     return 'сотрудники'
+        elif 'сотрудн' in tag:
+            return 'сотрудники'
         elif 'график' in tag:
             return 'график_работы'
         elif 'карт' in tag:
@@ -60,3 +64,77 @@ def rename_tags(tag):
 def join_words(text):
     interm =  ','.join(text)
     return interm.replace(",", " ")
+
+
+def process_classes(df_headline):
+
+    # TODO: удалять
+    with open('stop-words-ru.txt') as f:
+        russian_stopwords = [x.strip('\n') for x in f]
+
+    # Проверяем количество переменных и наблюдений
+    df_headline = df_headline.drop_duplicates()
+    df_headline = df_headline.dropna(subset=['Текст отзыва', 'Теги'])
+    print(df_headline.shape)
+
+
+    # Отобразим примеры заголовков
+    # print('SOURCE')
+    # print(df_headline[['Текст отзыва', 'Теги']].head(3))
+
+    df_headline['Теги'] = df_headline['Теги'].apply(rename_tags) 
+    df_headline['Теги'] = df_headline['Теги'].str.replace("благодарность - " ,"") 
+    df_headline['Теги'] = df_headline['Теги'].str.replace(" " ,"_") 
+
+    df_headline['Текст отзыва'] = df_headline['Текст отзыва'].str.replace('\n', ' ')
+    df_headline['Текст отзыва'] = df_headline['Текст отзыва'].apply(simple_preprocess) 
+    df_headline['Текст отзыва'] = df_headline['Текст отзыва'].apply(join_words) 
+    # print('PROCESSED')
+    # print(df_headline[['Текст отзыва', 'Теги']].head(3))
+
+    vc = df_headline['Теги'].value_counts()
+    selected_classes = vc[vc > 100].keys()
+
+    # print('selected_classes ', selected_classes)
+
+    # print(f"ALL CLASSES LEN {len(selected_classes)}")
+    # print(selected_classes)
+    # df_headline = df_headline[df_headline['Теги'].isin(selected_classes)]
+
+    df_headline['Теги']  = np.where(df_headline['Теги'].isin(selected_classes), df_headline['Теги'], 'без_тематики')
+
+    skip = ['качество_обслуживания', 'благодарность_общая', 'без_тематики']
+    df_headline = df_headline[~df_headline['Теги'].isin(skip)]
+
+    return df_headline
+
+
+
+
+def process(df_headline):
+
+    # TODO: удалять
+    with open('stop-words-ru.txt') as f:
+        russian_stopwords = [x.strip('\n') for x in f]
+    # Проверяем количество переменных и наблюдений
+    df_headline = df_headline.drop_duplicates()
+    df_headline = df_headline.dropna(subset=['Текст отзыва', 'Тональность отзыва'])
+    print(df_headline.shape)
+
+    df_headline = df_headline[df_headline['Тональность отзыва'] != 0]
+
+    # df_headline['Тональность отзыва'] = df_headline['Тональность отзыва'].astype('int')
+
+
+    # Отобразим примеры заголовков
+    # print('SOURCE')
+    # print(df_headline[['Текст отзыва', 'Теги']].head(3))
+
+    df_headline['Текст отзыва'] = df_headline['Текст отзыва'].str.replace('\n', ' ')
+    df_headline['Текст отзыва'] = df_headline['Текст отзыва'].apply(simple_preprocess) 
+    df_headline['Текст отзыва'] = df_headline['Текст отзыва'].apply(join_words) 
+    # print('PROCESSED')
+    # print(df_headline[['Текст отзыва', 'Теги']].head(3))
+
+    return df_headline
+

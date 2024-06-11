@@ -4,42 +4,12 @@ import fasttext
 from gensim.utils import simple_preprocess
 from sklearn.metrics import precision_recall_fscore_support, classification_report
 
+import warnings
+warnings.filterwarnings("ignore")
 
-def rename_tags(tag):
-    if type(tag) == str:
-        if 'навязыван' in tag:
-            return 'навязывание_продуктов'
-        elif 'благодарность общая' in tag:
-            return 'благодарность_общая'
-        elif 'комфорт' in tag:
-            return 'комфорт'
-        elif 'банкомат' in tag:
-            return 'банкоматы'
-        elif 'очеред' in tag:
-            return 'очередь'
-        elif 'ВТБ' in tag:
-            return 'мобайл/онлайн'
-        elif 'сотрудн' in tag:
-            return 'сотрудники'
-        elif 'график' in tag:
-            return 'график_работы'
-        elif 'карт' in tag:
-            return 'карта'
-        elif 'парков' in tag:
-            return 'парковка'
-        else:
-            return tag
-    else:
-        return tag
+fasttext.FastText.eprint = lambda x: None
 
-def join_words(text):
-    interm =  ','.join(text)
-    return interm.replace(",", " ")
-
-def extract_tag(tag):
-    if len(tag) > 5:
-        return tag.split("value': '",1)[1][:-3]
-
+from utils import rename_tags, join_words, extract_tag, process_classes
 
 
 df_2024 = pd.read_csv('2024_tags.csv',sep=';')
@@ -47,33 +17,13 @@ df_2024 = pd.read_csv('2024_tags.csv',sep=';')
 df_2024.rename(columns={'tags' : 'Теги', 'text_author': 'Текст отзыва'}, inplace=True)
 df_2024['Теги'] = df_2024['Теги'].apply(extract_tag) 
 
-generated_data = pd.read_csv('generated_data.csv')
-
 df_headline = pd.read_csv('Tanya_file.csv',encoding='utf-8-sig')
-
-#, generated_data
 df_headline = pd.concat([df_headline, df_2024], axis=0)
 
-skip = ['качество_обслуживания', 'благодарность_общая', 'без_тематики']
-df_headline = df_headline[~df_headline['Теги'].isin(skip)]
-
-df_headline = df_headline.drop_duplicates()
-df_headline = df_headline.dropna(subset=['Текст отзыва', 'Теги'])
+df_headline = process_classes(df_headline)
 print(df_headline.shape)
 
-
-
-# Отобразим примеры заголовков
-# print('SOURCE')
-# print(df_headline[['Текст отзыва', 'Теги']].head(3))
-
-
-df_headline['Теги'] = df_headline['Теги'].apply(rename_tags) 
-df_headline['Теги'] = df_headline['Теги'].str.replace("благодарность - " ,"") 
-df_headline['Теги'] = df_headline['Теги'].str.replace(" " ,"_") 
-
-df_headline['Текст отзыва'] = df_headline['Текст отзыва'].apply(simple_preprocess) 
-df_headline['Текст отзыва'] = df_headline['Текст отзыва'].apply(join_words) 
+# print(df_headline['Теги'].value_counts())
 
 with open('test_index.txt') as f:
     test_index = [int(x.strip('\n')) for x in f]
@@ -81,9 +31,17 @@ with open('test_index.txt') as f:
 X_test = df_headline[df_headline.index.isin(test_index)]['Текст отзыва']
 y_test = df_headline[df_headline.index.isin(test_index)]['Теги']
 
+print('X_test')
+print(X_test.sample(3))
 
-model = fasttext.load_model('models/model_13_june_1.bin')
-# model = fasttext.load_model(''models/model-10_june_3.bin')
+print('y_test')
+print(y_test[:3])
+# print(X_test['Теги'].value_counts())
+
+model_name = 'models/model_13_june_1.bin'
+# model_name =  'models/model-10_june_3.bin'
+print(f"I will inference {model_name}")
+model = fasttext.load_model(model_name)
 
 def predict(model, test_data):
 
@@ -122,17 +80,17 @@ df = pd.DataFrame({'pred' : model_predictions, 'true' : y_test, 'text' : X_test}
 
 
 error = df[df['pred'] != df['true']]
-print('%')
+print("% of errors in the test")
 print(len(error)/len(df))
 
-print('error')
-print(error['true'].value_counts())
+# print('error')
+# print(error['true'].value_counts())
 error.to_csv('error.csv', index=False)
 
 
 for s in np.unique(error['true']):
     try:
         sample = error[error['true'] == s]
-        sample.to_csv(f'{s}_error.csv')
+        sample.to_csv(f'errors/{s}_error.csv')
     except:
         pass

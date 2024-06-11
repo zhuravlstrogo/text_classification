@@ -170,6 +170,7 @@ data/
 from_Tanya/
 models/
 reviews/
+errors/
 
 *.html
 *.csv
