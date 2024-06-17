@@ -56,6 +56,10 @@ df_headline = pd.read_csv('Tanya_file.csv',encoding='utf-8-sig')
 df_headline = pd.concat([df_headline, df_2024], axis=0)
 df_headline = process_classes(df_headline)
 
+# label = 'счет'
+# l = df_headline[df_headline['Теги'] == label]
+# print(f'before: {len(l)}')
+
 # отложить честный test
 #  стратификация 
 X = df_headline['Текст отзыва']
@@ -84,13 +88,19 @@ df_headline = df_headline.loc[~df_headline.index.isin(test_index)]
 N = len(df_headline)
 print(f'CHECK: {N == len(X_train)}')
 
-
 generated_data = pd.read_csv('generated_data.csv')
 generated_data = process_classes(generated_data)
+generated_data = generated_data[generated_data['Теги'] != 'очередь']
 
 df_headline = pd.concat([df_headline, generated_data], axis=0)
 print(f'{len(df_headline) - N} generated data added')
 print(f'TOTAL LEN {len(df_headline)} ')
+
+# df_headline.to_csv('train.csv')
+# 1/0
+
+# l = df_headline[df_headline['Теги'] == label]
+# print(f'after: {len(l)}')
 
 print('value_counts')
 print(df_headline['Теги'].value_counts())
@@ -112,8 +122,8 @@ with open('train.txt', 'w') as f:
         
 
 # модель
-model1 = fasttext.train_supervised('train.txt', epoch=500, lr=1.0, wordNgrams =2)
-model_name = "model_13_june_2.bin"
+model1 = fasttext.train_supervised('train.txt', epoch=750, lr=1.0, wordNgrams =2)
+model_name = "model_13_june_3.bin"
 model1.save_model("models/" + model_name)
 print(f' {model_name} saved')
 

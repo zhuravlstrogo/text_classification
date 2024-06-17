@@ -38,7 +38,7 @@ print('y_test')
 print(y_test[:3])
 # print(X_test['Теги'].value_counts())
 
-model_name = 'models/model_13_june_1.bin'
+model_name = 'models/model_13_june_3.bin'
 # model_name =  'models/model-10_june_3.bin'
 print(f"I will inference {model_name}")
 model = fasttext.load_model(model_name)
@@ -77,6 +77,8 @@ df = pd.DataFrame({'pred' : model_predictions, 'true' : y_test, 'text' : X_test}
 # print("RESULTS")
 # print(df.sample(7))
 
+df.to_csv('test_with_predict.csv')
+1/0
 
 
 error = df[df['pred'] != df['true']]
