@@ -78,12 +78,13 @@ for i, (train_index, test_index) in enumerate(sss.split(X, y)):
 print(f'train size: {len(X_train)}, {len(y_train)}')
 print(f'test size: {len(X_test)}, {len(y_test)}')
 
+# with open("train_index.txt", 'w') as output:
+#     for row in list(X_train.index):
+#         output.write(str(row) + '\n')
+
 with open("test_index.txt", 'w') as output:
     for row in list(X_test.index):
         output.write(str(row) + '\n')
-
-# with open('test_index.txt') as f:
-#     test_index = [int(x.strip('\n')) for x in f]
 
 df_headline = df_headline.loc[~df_headline.index.isin(test_index)]
 N = len(df_headline)

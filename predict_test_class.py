@@ -28,6 +28,7 @@ print(df_headline.shape)
 with open('test_index.txt') as f:
     test_index = [int(x.strip('\n')) for x in f]
 
+
 X_test = df_headline[df_headline.index.isin(test_index)]['Текст отзыва']
 y_test = df_headline[df_headline.index.isin(test_index)]['Теги']
 

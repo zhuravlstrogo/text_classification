@@ -10,6 +10,8 @@ df_2024.rename(columns={'tags' : 'Теги', 'text_author': 'Текст отзы
 df_2024['Теги'] = df_2024['Теги'].apply(extract_tag) 
 
 df_headline = pd.read_csv('Tanya_file.csv',encoding='utf-8-sig')
+print(len(df_headline))
+1/0
 df_headline = pd.concat([df_headline, df_2024], axis=0)
 
 # оценка 4-5, тональгнось негативная - сколько таких в %

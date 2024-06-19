@@ -36,6 +36,8 @@ def rename_tags(tag):
             return 'комфорт'
         elif 'банкомат' in tag:
             return 'банкоматы'
+        elif 'скорость' in tag:
+            return 'скорость работы'
         elif 'очеред' in tag:
             return 'очередь'
         elif 'ВТБ' in tag:
