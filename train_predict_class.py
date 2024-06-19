@@ -56,6 +56,7 @@ df_headline = pd.read_csv('Tanya_file.csv',encoding='utf-8-sig')
 df_headline = pd.concat([df_headline, df_2024], axis=0)
 df_headline = process_classes(df_headline)
 
+
 # label = 'счет'
 # l = df_headline[df_headline['Теги'] == label]
 # print(f'before: {len(l)}')
@@ -123,7 +124,7 @@ with open('train.txt', 'w') as f:
 
 # модель
 model1 = fasttext.train_supervised('train.txt', epoch=750, lr=1.0, wordNgrams =2)
-model_name = "model_13_june_3.bin"
+model_name = "model_17_june_1.bin"
 model1.save_model("models/" + model_name)
 print(f' {model_name} saved')
 

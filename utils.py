@@ -93,9 +93,10 @@ def process_classes(df_headline):
     # print(df_headline[['Текст отзыва', 'Теги']].head(3))
 
     vc = df_headline['Теги'].value_counts()
-    selected_classes = vc[vc > 100].keys()
+    selected_classes = list(vc[vc > 100].keys())
 
-    # print('selected_classes ', selected_classes)
+    print(f'selected {len(selected_classes)} classes')
+
 
     # print(f"ALL CLASSES LEN {len(selected_classes)}")
     # print(selected_classes)
@@ -103,7 +104,8 @@ def process_classes(df_headline):
 
     df_headline['Теги']  = np.where(df_headline['Теги'].isin(selected_classes), df_headline['Теги'], 'без_тематики')
 
-    skip = ['качество_обслуживания', 'благодарность_общая', 'без_тематики']
+
+    skip = ['качество_обслуживания', 'благодарность_общая'] # , 'без_тематики'
     df_headline = df_headline[~df_headline['Теги'].isin(skip)]
 
     return df_headline
