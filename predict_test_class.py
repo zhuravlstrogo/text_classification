@@ -28,9 +28,12 @@ print(df_headline.shape)
 with open('test_index.txt') as f:
     test_index = [int(x.strip('\n')) for x in f]
 
-
+print(np.unique(df_headline['Теги']))
+print('***************')
 X_test = df_headline[df_headline.index.isin(test_index)]['Текст отзыва']
 y_test = df_headline[df_headline.index.isin(test_index)]['Теги']
+
+
 
 print('X_test')
 print(X_test.sample(3))
