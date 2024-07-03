@@ -7,22 +7,56 @@ import numpy as np
 import datetime
 
 
+# tags_2024 = pd.read_csv('2024_tags.csv', sep=';')
+tags_2023 = pd.read_csv('2023_tags.csv', sep=';')
+# tags_2022 = pd.read_csv('2022_tags.csv', sep=';')
 
-# df = pd.read_csv('Tanya_file.csv',encoding='utf-8-sig')
+parser_id = set(tags_2023['id'].unique())
 
-df = pd.read_csv('2023_tags.csv', sep=';')
+# tags_df = pd.concat([tags_2024, tags_2023, tags_2022], axis=0)
+
+# print(f'2024: {len(tags_2024)}')
+# print(f'2023: {len(tags_2023)}')
+# print(f'2022: {len(tags_2022)}')
+
+df = pd.read_csv('Tanya_file.csv')
+
+print(max(df['Дата публикации отзыва'])) # 2023-09-22
+print(min(df['Дата публикации отзыва'])) # 2021-09-01
+
+1/0
+print(f'len df {len(df)}')
+df = df.drop_duplicates(subset='ID отзыва')
 print(len(df))
-# # df = pd.read_csv('comm_2023-01-01_2023-12-31.csv', sep=';')
 
-# df = df[df['Дата публикации отзыва'] == '2023-03-04']
+print(f'len tags {len(tags_2023)}')
+# tags_2023 = tags_2023.drop_duplicates(subset='id')
+# print(len(tags_2023))
 
-# print(df['Время публикации отзыва'].sample(7))
+print('DUPLICATES')
+ids = tags_2023["id"]
+print(tags_2023[ids.isin(ids[ids.duplicated()])].sort_values("id"))
 
-# print(min(df['Время публикации отзыва']))
-# print(max(df['Время публикации отзыва']))
+# file_id = set(df['ID отзыва'].unique())
 
-# # print(df.head())
-# print(np.unique(df['Время публикации отзыва']))
+# print('intersection')
+# print(len(file_id.intersection(parser_id)))
+
+
+# dt_date = '2023-03-25'
+# df_2023 = df[(df['Дата публикации отзыва'] >= dt_date) & (df['Дата публикации отзыва'] <= dt_date)]
+
+# df_2023.to_excel(f'file_{dt_date}.xlsx')
+
+# df_2023 = df_2023[df_2023['Теги'].notnull()]
+# print(f'2023: {len(df_2023)}')
+
+# df_2022 = df[(df['Дата публикации отзыва'] >= '2022-01-01') & (df['Дата публикации отзыва'] <= '2022-12-31')]
+# df_2022 = df_2022[df_2022['Теги'].notnull()]
+# print(f'2022: {len(df_2022)}')
+
+# print('MAX')
+# print(max(df['Дата публикации отзыва']))
 
 
 def merge_all_csv(csv_dir, result_csv):

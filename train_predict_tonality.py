@@ -16,19 +16,16 @@ pd.options.display.max_colwidth = 1000
 
 
 # Загружаем данные
-# df_2023 = pd.read_csv('2023_tags.csv',sep=';')
-df_2024 = pd.read_csv('2024_tags.csv',sep=';')
-# df_headline = pd.concat([df_2023, df_2024], axis=0)
+
+df_2024 = pd.read_csv('comm_3650.csv',sep=';')
 
 df_2024.rename(columns={'tags' : 'Теги', 'text_author': 'Текст отзыва', 'text_tonality' : 'Тональность отзыва'}, inplace=True)
-df_2024['Теги'] = df_2024['Теги'].apply(extract_tag) 
+# df_2024['Теги'] = df_2024['Теги'].apply(extract_tag) 
 
-df_headline = pd.read_csv('Tanya_file.csv',encoding='utf-8-sig')
-
-tonality_map = {'Позитивная' : 1, 'Негативная' : 3, 'Нейтральная' : 2}
+tonality_map = {'pos' : 1, 'neg' : 3, 'neu' : 2}
 df_headline['Тональность отзыва'] = df_headline['Тональность отзыва'].map(tonality_map)
 
-df_headline = pd.concat([df_headline, df_2024], axis=0)
+
 df_headline = process(df_headline)
 
 
@@ -39,6 +36,7 @@ print(df_headline['Тональность отзыва'].value_counts())
 #  стратификация 
 X = df_headline['Текст отзыва']
 y = df_headline['Тональность отзыва']
+
 sss = StratifiedShuffleSplit(n_splits=5, test_size=0.25, random_state=0)
 
 for i, (train_index, test_index) in enumerate(sss.split(X, y)):

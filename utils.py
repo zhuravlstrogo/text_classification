@@ -9,22 +9,53 @@ def extract_tag(tag):
         return tag.split("value': '",1)[1][:-3]
 
 
-def create_tags(review):
-    if type(review) == str:
-        if 'очеред' in review or 'долго' or 'медлен':
-            return 'очередь'
-        # кредит, банкомат
-        elif 'навяз' in review:
-            return 'навязывание_продуктов'
-        elif 'сотрудн' in review:
-            return 'сотрудники'
-        elif 'парков' in review:
-            return 'парковка'
-        else:
-            return None
-    else:
-            return None
+# def create_tags(review):
+#     if type(review) == str:
 
+#         if "очеред" in review or "долго" in review or "медлен" in review or "жда" in review or 'ожидан' in review:
+#             return 'очередь'
+#         elif 'быстр' in review or 'скорость' in review or 'времен' in review or \
+#         'минут' in review or 'чac' in review:
+#             return 'скорость работы'
+#         elif 'навяз' in review or 'впарив' in review or 'самовольно' in review :
+#             return 'навязывание_продуктов'
+#         elif 'мошенн' in review or 'обман' in review or 'утечк' in review or 'утекл' in review \
+#         or 'врань' in review or 'врать' in review or 'воровств' in review \
+#         or 'заблужд' in review or 'развод' in review :
+#             return 'мошенничество'
+#         elif 'сотрудн' in review or 'грамотн' in review or 'вежлив' in review or \
+#         'персонал' in review оr 'коллектив' in review or 'менеджер' in review or 'обслужив' in review оr 'работник' in review or 'специалист' in review \
+#         or 'девочк' in review or 'оперативно' in review or 'помorли' in review \
+#         or 'ребят' in review or 'груб' in review or 'администр' in review \
+#         or 'отношен' in review or 'неуважен' in review or 'xaмск' in review or \
+#         'хамств' in review or 'хамят' in review or "надмен" in review or \
+#         'женщин' in review or 'руководств' in review or 'высокомерн' in review \
+#         or 'девушк' in review or 'консультант' in review or 'компетентн' in review \
+#         or 'общаться' in review or 'клиент' in review:
+#             return "сотрудники"
+#         elif 'пенс' in review:
+#             return 'пенсонеры'
+#         elif 'вклад' in review:
+#             return 'вклады'
+#         elif 'приложен' in review:
+#             return 'приложение'
+#         elif 'график' in review or 'суббот' in review or 'воскресен' in review or 'будни' in review \
+#         or 'круглосуточн' in review:
+#             return "график работы"
+#         elif "кредит" in review:
+#             return "кредит"
+#         elif 'ипоте' in review:
+#             return "ипотека"
+#         elif 'карт' in review:
+#             return "карта"
+#         elif 'касс' in review or 'валют' in review:
+#             return 'кассовое_обслуживаниеэ'
+#         elif 'комф' in review or 'удобн' in review or 'уютн' in review or 'площадь' in review \
+#         or 'охран' in review or 'офис' in review or 'кондицион' in review \
+#         or 'здани' in review or 'ремонт' in review or 'доступност' in review \
+#          or 'расположен' in review:
+#             return None
+#         # TODO: дописать 
 
 def rename_tags(tag):
     if type(tag) == str:

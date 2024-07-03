@@ -1,37 +1,25 @@
 import pandas as pd
 import numpy as np
-
-from utils import rename_tags, join_words, extract_tag, process_classes
-
-
-df_2024 = pd.read_csv('2024_tags.csv',sep=';')
-# df_headline = pd.concat([df_2023, df_2024], axis=0)
-df_2024.rename(columns={'tags' : 'Теги', 'text_author': 'Текст отзыва'}, inplace=True)
-df_2024['Теги'] = df_2024['Теги'].apply(extract_tag) 
-
-df_headline = pd.read_csv('Tanya_file.csv',encoding='utf-8-sig')
-print(len(df_headline))
-1/0
-df_headline = pd.concat([df_headline, df_2024], axis=0)
-
-# оценка 4-5, тональгнось негативная - сколько таких в %
-
-# print(df_headline.columns)
-
-# print(df_headline[['Оценка', 'Тональность отзыва']].sample(7))
-
-sample1 = df_headline[(df_headline['Оценка'] > 3) & (df_headline['Тональность отзыва'] =='Негативная') ]
-print(sample1[['Оценка', 'Тональность отзыва']].sample(7))
-
-print('%')
-print(len(sample1)/len(df_headline))
+from datetime import datetime
+import unicodedata
+# from utils import rename_tags, join_words, extract_tag, process_classes
+import emoji
+import emojis
+import math
+import time
+import ast
+import re
+from deep_translator import GoogleTranslator
+from emosent import get_emoji_sentiment_rank
 
 
-sample2 = df_headline[(df_headline['Оценка'] < 3) & (df_headline['Тональность отзыва'] =='Позитивная') ]
-print(sample2[['Оценка', 'Тональность отзыва']].sample(7))
 
-print('%')
-print(len(sample2)/len(df_headline))
+df = pd.read_csv('comm_3650.csv' ,sep=';')
 
-print()
-print(len(df_headline))
+print(max(df['published_at']))
+
+sample1 = df[(df['published_at'] >= '2024-06-01') & (df['published_at'] <= '2024-06-30')]
+print(len(sample1))
+
+sample2 = df[(df['published_at'] >= '2024-05-01') & (df['published_at'] <= '2024-05-31')]
+print(len(sample2))
