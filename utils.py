@@ -4,6 +4,25 @@ import numpy as np
 from gensim.utils import simple_preprocess
 
 
+# emojis = pd.read_csv('emoji_vc_mean_rating.csv')
+# emojis = emojis[emojis['mark'].notnull()]
+# emojis_dict = dict(emojis[['Smiley', 'mark']].values)
+
+# def replace_emoji(text):
+#    indexes = []
+#    text_emoji = ''
+#    for match in re.finditer(r'[^\w\s,]', text):
+#       indexes.append(match.start())
+#    for i in indexes:
+#       try:
+#          emoji =text[i]
+#          text_emoji += ' ' + emojis_dict[emoji]
+#       except:
+#          pass 
+#    text = "".join([char for idx, char in enumerate(text) if idx not in indexes]) + text_emoji 
+
+#    return text 
+
 def replace_emoji(text):
    indexes = []
    text_emoji = ''
@@ -94,7 +113,7 @@ def rename_tags(tag):
             return 'сотрудники'
         elif 'график' in tag:
             return 'график_работы'
-        elif 'карт' in tag or 'кредит' in tag or 'ипотек' in tag or 'вклад' in tag or 'страхов' in tag or :
+        elif 'карт' in tag or 'кредит' in tag or 'ипотек' in tag or 'вклад' in tag or 'страхов' in tag:
             return 'продукты'
         else:
             return tag
@@ -121,18 +140,17 @@ def process_text(df_headline, text_col='Текст отзыва'):
     return df_headline
 
 
-def process_classes(df_headline):
+def process_classes(df_headline, tags_col = 'Тег 1'):
     """для тем"""
-    df_headline = df_headline.dropna(subset=['Текст отзыва', 'Теги'])
-
-    df_headline['Теги'] = df_headline['Теги'].apply(rename_tags) 
-    df_headline['Теги'] = df_headline['Теги'].str.replace("благодарность - " ,"") 
-    df_headline['Теги'] = df_headline['Теги'].str.replace(" " ,"_") 
+    df_headline[tags_col] = df_headline[tags_col].astype(str)
+    df_headline[tags_col] = df_headline[tags_col].apply(rename_tags) 
+    df_headline[tags_col] = df_headline[tags_col].str.replace("благодарность - " ,"") 
+    df_headline[tags_col] = df_headline[tags_col].str.replace(" " ,"_") 
 
     return df_headline
 
 
-def process(df_headline):
+def process_tonality(df_headline):
     """для тональности"""
     # TODO: удалять
     with open('stop-words-ru.txt') as f:
@@ -144,18 +162,29 @@ def process(df_headline):
 
     df_headline = df_headline[df_headline['Тональность отзыва'] != 0]
 
-    # df_headline['Тональность отзыва'] = df_headline['Тональность отзыва'].astype('int')
+    df_headline['text_processed'] = df_headline['Текст отзыва'].astype(str)
+    df_headline['text_processed'] = df_headline['text_processed'].str.replace('\n', ' ')
+    df_headline['text_processed'] = df_headline['text_processed'].apply(replace_emoji) 
+    df_headline['text_processed'] = df_headline['text_processed'].apply(simple_preprocess) 
+    df_headline['text_processed'] = df_headline['text_processed'].apply(join_words) 
 
-
-    # Отобразим примеры заголовков
-    # print('SOURCE')
-    # print(df_headline[['Текст отзыва', 'Теги']].head(3))
-
-    df_headline['Текст отзыва'] = df_headline['Текст отзыва'].str.replace('\n', ' ')
-    df_headline['Текст отзыва'] = df_headline['Текст отзыва'].apply(simple_preprocess) 
-    df_headline['Текст отзыва'] = df_headline['Текст отзыва'].apply(join_words) 
+    df_headline = df_headline[df_headline['text_processed'] != '']
     # print('PROCESSED')
     # print(df_headline[['Текст отзыва', 'Теги']].head(3))
 
     return df_headline
 
+
+def predict_by_rating(rating):
+    try:
+        rating = int(rating)
+        if rating > 3:
+            return 'pos'
+        elif rating == 3:
+            return 'neu'
+        elif rating < 3:
+            return 'neg'
+        else:
+            return None
+    except:
+        return None
