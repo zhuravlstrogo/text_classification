@@ -9,7 +9,7 @@ warnings.filterwarnings("ignore")
 
 pd.options.display.max_colwidth = 1000
 
-from utils import extract_tag, create_tags, rename_tags, join_words, process_classes
+from utils import extract_tag, create_tags, rename_tags, join_words, process_classes, replace_emoji
 
 # TODO: очереди, сотрудники, скорость, комфорт регуляркой помечать?
 # TODO: посмотреть топ слов по встречаемости, добавить их в словарь стоп слов
@@ -45,56 +45,102 @@ from utils import extract_tag, create_tags, rename_tags, join_words, process_cla
 
 # Загружаем данные
 
-# df_2023 = pd.read_csv('2023_tags.csv',sep=';')
-df_2024 = pd.read_csv('2024_tags.csv',sep=';')
-# df_headline = pd.concat([df_2023, df_2024], axis=0)
-df_2024.rename(columns={'tags' : 'Теги', 'text_author': 'Текст отзыва'}, inplace=True)
-df_2024['Теги'] = df_2024['Теги'].apply(extract_tag) 
+df_headline = pd.read_csv('comm_3650.csv',sep=';')
+df_headline = df_headline.sropna(subset=['id'])
 
-df_headline = pd.read_csv('Tanya_file.csv',encoding='utf-8-sig')
+df_headline = df_headline[df_headline['puplished_at_author'] >= '2017-01-01']
 
-df_headline = pd.concat([df_headline, df_2024], axis=0)
-df_headline = process_classes(df_headline)
+df_headline = df_headline[df_headline['tags'] != '[]']
+df_headline.drop(['text', 'puplished_at'], axis=1, inplace=True)
+
+df_headline.rename(columns={
+'author':'Автор',
+'company_uuid':'Номер филиала',
+'id':'ID отзыва',
+'provider_id':'ID платформы',
+'puplished_at_author':'Дата публикации отзыва',
+'rating':'Оценка',
+'text_author':'Текст',
+'reply':'Ответ',
+'text_tonality':'Тональность отзыва',
+'tags':'Теги'}, inplace=True)
+
+df_headline['Теги'] = df_headline['Теги'].apply(extract_tag)
+
+val = df_headline['Теги'].apply(len).max()
+cols = ['Тег ' + str(i) for i in range(1, val+1)]
+df_headline[cols] = df_headline['Теги'].apply(pd.Series).fillna('')
+
+df_headline = df_headline[df_headline['Тег 2'] == '']
+X_processed = process_classes(df_headline)
+
+cols = ['Дата публикации отзыва', 'Текст отзыва', 'Теги 1']
+skip = ['качество_обслуживания', 'благодарность_общая', 'без_тематики']
+
+X_processed = X_processed[~X_processed['Теги'].isin(skip)][cols]
+
+# TODO: добавить код из create tags
+
+# TODO: X_processed = pd.concat([X_processed, tagged_reviews], axis=0)
 
 
-# label = 'счет'
-# l = df_headline[df_headline['Теги'] == label]
-# print(f'before: {len(l)}')
+X_processed = process_text(X_processed)
 
-# отложить честный test
-#  стратификация 
-X = df_headline['Текст отзыва']
-y = df_headline['Теги']
-sss = StratifiedShuffleSplit(n_splits=5, test_size=0.25, random_state=0)
+X_processed = X_processed.drop_duplicates(subset=['text_processed', 'Теги'])
+X_processed = X_processed.dropna(subset=['text_processed', 'Теги'])
+X_processed = X_processed[X_processed['Теги'].notnull()]
+X_processed = X_processed[X_processed['text_processed'].notnull()]
 
-for i, (train_index, test_index) in enumerate(sss.split(X, y)):
-    # print(f"Fold {i}:")
-    # print(f"  Train: index={train_index}")
-    # print(f"  Test:  index={test_index}")
-    
-    X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-    y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+vc = X_processed['Теги'].value_counts()
+selected_classes = list(vc[vc > 500].keys())
+print(f'selected_classes {len(selected_classes)}')
 
-print(f'train size: {len(X_train)}, {len(y_train)}')
-print(f'test size: {len(X_test)}, {len(y_test)}')
+X_processed['Теги'] = np.where(X_processed['Теги'] .isin(selected_classes), X_processed['Теги'], 'без_тематики')
 
-# with open("train_index.txt", 'w') as output:
-#     for row in list(X_train.index):
+
+# стратификация по дате
+X = X_processed[['text_processed', 'Теги', 'Дата публикации отзыва']]
+
+split_date = '2024-01-20'
+target_col = 'Теги'
+
+X_train = X[X['Дата публикации отзыва'] < split_date]['text_processed']
+y_train = X[X['Дата публикации отзыва'] < split_date][target_col]
+
+X_test = X[X['Дата публикации отзыва'] >= split_date]['text_processed']
+y_test = X[X['Дата публикации отзыва'] >= split_date][target_col]
+
+# TODO: print len test 
+
+# # TODO: отложить честный test
+# X = df_headline['Текст отзыва']
+# y = df_headline['Теги']
+# sss = StratifiedShuffleSplit(n_splits=5, test_size=0.25, random_state=0)
+
+# for i, (train_index, test_index) in enumerate(sss.split(X, y)):
+#     X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+#     y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+
+# print(f'train size: {len(X_train)}, {len(y_train)}')
+# print(f'test size: {len(X_test)}, {len(y_test)}')
+
+# TODO: сплит не работает 
+# with open("test_index.txt", 'w') as output:
+#     for row in list(X_test.index):
 #         output.write(str(row) + '\n')
 
-with open("test_index.txt", 'w') as output:
-    for row in list(X_test.index):
-        output.write(str(row) + '\n')
-
-df_headline = df_headline.loc[~df_headline.index.isin(test_index)]
-N = len(df_headline)
-print(f'CHECK: {N == len(X_train)}')
+# df_headline = df_headline.loc[~df_headline.index.isin(test_index)]
+# N = len(df_headline)
+# print(f'CHECK: {N == len(X_train)}')
 
 generated_data = pd.read_csv('generated_data.csv')
 generated_data = process_classes(generated_data)
-generated_data = generated_data[generated_data['Теги'] != 'очередь']
+generated_data = process_texr(generated_data)
+generated_data = generated_data[generated_data['Теги'].isin(selected_classes)]
+# generated_data = generated_data[generated_data['Теги'] != 'очередь']
 
-df_headline = pd.concat([df_headline, generated_data], axis=0)
+# Я ТУТ 
+X_train  = pd.concat([df_headline, generated_data], axis=0)
 print(f'{len(df_headline) - N} generated data added')
 print(f'TOTAL LEN {len(df_headline)} ')
 
