@@ -166,9 +166,19 @@ src/logs/*.slog.*
 .DS_Store
 
 
-data/
+# Project artifacts / data (keep directory placeholders)
+data/**
+!data/.gitkeep
+models/**
+!models/.gitkeep
+logs/**
+!logs/.gitkeep
+output/**
+!output/.gitkeep
+reports/**
+!reports/.gitkeep
+
 from_Tanya/
-models/
 reviews/
 errors/
 
@@ -182,5 +192,3 @@ errors/
 *.tar
 
 config.py
-
-README.md

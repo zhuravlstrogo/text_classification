@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "text-classification"
+version = "0.1.0"
+description = "Text classification experiments (topics/tonality)"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Project Authors" }]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "black>=24.3.0",
+  "isort>=5.13.2",
+  "pylint>=3.2.6",
+  "pre-commit>=3.8.0",
+  "pytest>=8.0.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+include = "\\.pyi?$"
+
+[tool.isort]
+profile = "black"
+line_length = 88
+src_paths = ["src", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+

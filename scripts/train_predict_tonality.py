@@ -9,7 +9,12 @@ from gensim.utils import simple_preprocess
 import warnings
 warnings.filterwarnings("ignore")
 
-from utils import extract_tag, join_words, process_tonality
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from text_classification.utils import extract_tag, join_words, process_tonality
 
 pd.options.display.max_colwidth = 1000
 

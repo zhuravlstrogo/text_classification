@@ -1,7 +1,12 @@
 import pandas as pd
 import numpy as np
 
-from utils import extract_tag
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from text_classification.utils import extract_tag
 
 def analyze_text(text):
     # Разделение текста на слова

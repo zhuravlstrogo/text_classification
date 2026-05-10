@@ -2,7 +2,12 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import unicodedata
-from utils import rename_tags, join_words, extract_tag, process_classes
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from text_classification.utils import rename_tags, join_words, extract_tag, process_classes
 import emoji
 import emojis
 import math

@@ -9,7 +9,18 @@ warnings.filterwarnings("ignore")
 
 pd.options.display.max_colwidth = 1000
 
-from utils import extract_tag, rename_tags, join_words, process_classes, replace_emoji
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from text_classification.utils import (
+    extract_tag,
+    join_words,
+    process_classes,
+    rename_tags,
+    replace_emoji,
+)
 
 # TODO: очереди, сотрудники, скорость, комфорт регуляркой помечать?
 # TODO: посмотреть топ слов по встречаемости, добавить их в словарь стоп слов

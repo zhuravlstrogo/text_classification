@@ -9,7 +9,12 @@ warnings.filterwarnings("ignore")
 
 fasttext.FastText.eprint = lambda x: None
 
-from utils import rename_tags, join_words, extract_tag, process_classes
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from text_classification.utils import rename_tags, join_words, extract_tag, process_classes
 
 
 df_2024 = pd.read_csv('2024_tags.csv',sep=';')
